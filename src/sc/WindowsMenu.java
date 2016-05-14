@@ -172,7 +172,122 @@ public class WindowsMenu extends JFrame implements ActionListener{
 		if(u.equals(COMMAND[0])){
 			 handleBackspace(); // 用户按了"Backspace"键
 		}
+		else if (u.equals(COMMAND[1])) {
+			// 用户按了"CE"键
+			text.setText("0");
+		} else if (u.equals(COMMAND[2])) {
+			// 用户按了"C"键
+			handleC();
+		} else if ("0123456789.".indexOf(u) >= 0) {
+			// 用户按了数字键或者小数点键
+			handleNumber(u);
+			// handlezero(zero);
+		} else {
+			// 用户按了运算符键
+			handleOperator(u);
+		}
 	}
+	/**
+	 * 处理数字键被按下的事件
+	 * 
+	 * @param key
+	 */
+	private void handleNumber(String key) {
+		if (firstDigit) {
+			// 输入的第一个数字
+			text.setText(key);
+		} else if ((key.equals(".")) && (text.getText().indexOf(".") < 0)) {
+			// 输入的是小数点，并且之前没有小数点，则将小数点附在结果文本框的后面
+			text.setText(text.getText() + ".");
+		} else if (!key.equals(".")) {
+			// 如果输入的不是小数点，则将数字附在结果文本框的后面
+			text.setText(text.getText() + key);
+		}
+		// 以后输入的肯定不是第一个数字了
+		firstDigit = false;
+	}
+
+	/**
+	 * 处理C键被按下的事件
+	 */
+	private void handleC() {
+		// 初始化计算器的各种值
+		text.setText("0");
+		firstDigit = true;
+		operator = "=";
+	}
+
+	/**
+	 * 处理运算符键被按下的事件
+	 * 
+	 * @param key
+	 */
+	private void handleOperator(String key) {
+		if (operator.equals("/")) {
+			// 除法运算
+			// 如果当前结果文本框中的值等于0
+			if (getNumberFromText() == 0.0) {
+				// 操作不合法
+				operateValidFlag = false;
+				text.setText("除数不能为零");
+			} else {
+				resultNum /= getNumberFromText();
+			}
+		} else if (operator.equals("1/x")) {
+			// 倒数运算
+			if (resultNum == 0.0) {
+				// 操作不合法
+				operateValidFlag = false;
+				text.setText("零没有倒数");
+			} else {
+				resultNum = 1 / resultNum;
+			}
+		} else if (operator.equals("+")) {
+			// 加法运算
+			resultNum += getNumberFromText();
+		} else if (operator.equals("-")) {
+			// 减法运算
+			resultNum -= getNumberFromText();
+		} else if (operator.equals("*")) {
+			// 乘法运算
+			resultNum *= getNumberFromText();
+		} else if (operator.equals("sqrt")) {
+			// 平方根运算
+			resultNum = Math.sqrt(resultNum);
+		} else if (operator.equals("%")) {
+			// 百分号运算，除以100
+			resultNum = resultNum / 100;
+		} else if (operator.equals("+/-")) {
+			// 正数负数运算
+			resultNum = resultNum * (-1);
+		} else if (operator.equals("=")) {
+			// 赋值运算
+			resultNum = getNumberFromText();
+		}
+		if (operateValidFlag) {
+			// 双精度浮点数的运算
+			long t1;
+			double t2;
+			t1 = (long) resultNum;
+			t2 = resultNum - t1;
+			if (t2 == 0) {
+				text.setText(String.valueOf(t1));
+			} else {
+				text.setText(String.valueOf(resultNum));
+			}
+		}
+		// 运算符等于用户按的按钮
+		operator = key;
+		firstDigit = true;
+		operateValidFlag = true;
+	}
+	
+
+	/**
+	 * 从结果文本框中获取数字
+	 * 
+	 * @return
+	 */
 	private double getNumberFromText() {
 		double result = 0;
 		try {
